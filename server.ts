@@ -35,7 +35,22 @@ wss.on("connection", (ws: WebSocketClient) => {
         };
         console.log(idFromUser);
         const client = new MongoClient();
-        await client.connect("mongodb+srv://AdminKamilo:I1udrg12@cluster0.8from.mongodb.net/myFirstDatabase?authMechanism=SCRAM-SHA-1");
+        await client.connect({
+            db: "margo",
+            tls: true,
+            servers: [
+              {
+                host: "cluster0-shard-00-02.8from.mongodb.net",
+                port: 27017,
+              },
+            ],
+            credential: {
+              username: "AdminKamilo",
+              password: "I1udrg12",
+              db: "margo",
+              mechanism: "SCRAM-SHA-1",
+            },
+        });
         const db = client.database("margo");
         const users = db.collection<user>("api");
         const didExist = await users.findOne({id: idFromUser.id});
