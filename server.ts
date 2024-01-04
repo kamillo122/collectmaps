@@ -20,6 +20,26 @@ interface dataUser {
     neighbours: [number];
 };
 
+const client = new MongoClient();
+await client.connect({
+    db: "margo",
+    tls: true,
+    servers: [
+        {
+            host: "cluster0-shard-00-02.8from.mongodb.net",
+            port: 27017,
+        },
+    ],
+    credential: {
+        username: "AdminKamilo",
+        password: "I1udrg12",
+        db: "margo",
+        mechanism: "SCRAM-SHA-1",
+    },
+});
+const db = client.database("margo");
+const users = db.collection<user>("api");
+
 wss.on("connection", (ws: WebSocketClient) => {
     ws.on("message", async (message: any) => {
         try {
@@ -34,25 +54,6 @@ wss.on("connection", (ws: WebSocketClient) => {
             neighbours: message.neighbours,
         };
         console.log(idFromUser);
-        const client = new MongoClient();
-        await client.connect({
-            db: "margo",
-            tls: true,
-            servers: [
-              {
-                host: "cluster0-shard-00-02.8from.mongodb.net",
-                port: 27017,
-              },
-            ],
-            credential: {
-              username: "AdminKamilo",
-              password: "I1udrg12",
-              db: "margo",
-              mechanism: "SCRAM-SHA-1",
-            },
-        });
-        const db = client.database("margo");
-        const users = db.collection<user>("api");
         const didExist = await users.findOne({id: idFromUser.id});
         if (!didExist) {
             const insertMap = await users.insertOne({
